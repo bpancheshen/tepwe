@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Word List</h1>
+
+  <ol>
+    <h3>Nouns</h3>
+    {% for word in words %}
+      {% if word.is_noun %}
+        <li>
+            {{ word.wordform}}
+            {{word.lemma}}
+            {{word.translation}}
+        </li>
+      {% endif %}
+    {% endfor %}
+    <h3>Verbs</h3>
+    {% for word in words %}
+      {% if word.is_verb %}
+        <li>
+            {{ word.wordform}}
+            {{word.lemma}}
+            {{word.translation}}
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ol>
+{% endblock %}
