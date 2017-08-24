@@ -15,7 +15,7 @@ class Word(models.Model):
     language = models.CharField(max_length=5, default=LEARNING_LANG, db_index=True)
     wordform = models.CharField(max_length=200, db_index=True)
     lemma = models.ForeignKey('Lemma', on_delete=models.CASCADE)
-    gram_code = models.CharField(max_length=40, default='null')
+    gram_code = models.ForeignKey('Tag', on_delete=models.CASCADE)
     translation = models.CharField(max_length=40)
 
     def __str__(self):
@@ -33,7 +33,8 @@ class Lemma(models.Model):
     lemma = models.CharField(max_length=20)
     language = models.CharField(max_length=5, default=LEARNING_LANG)
     pos = models.CharField(max_length=12) # Accomodate larger PoS
-    animacy = models.CharField(max_length=20)
+
+    course = models.ManyToManyField(Course)
 
     def __str__(self):
         return self.lemma
@@ -59,6 +60,10 @@ class Lemma(models.Model):
  	number = models.CharField(max_length=5)
     #Der/Dim or whether it's a diminutive or not
  	derivation = models.CharField(max_length=7)
+    #Comp, Superl
+ 	grade = models.CharField(max_length=10)
+    #Obv, Loc
+    case = models.CharField(max_length=5)
 
     #only applies to verbs
 
@@ -78,18 +83,19 @@ class Lemma(models.Model):
  	mode = models.CharField(max_length=7)
     #Prs, Prt, Fut
  	tense = models.CharField(max_length=5)
+    #Def, Int
+    intentional_definite = models.CharField(max_length=5)
 
- 	intentional_definite = models.CharField(max_length=5)
- 	attributive = models.CharField(max_length=5)
- 	case = models.CharField(max_length=5)
+
  	# conneg = models.CharField(max_length=5)
- 	grade = models.CharField(max_length=10)
  	infinite = models.CharField(max_length=10)
 
  	# language = models.CharField(max_length=8)
 
     #applies to other parts of speech
 
+    #Pos, I assume is possessive and not part of speech.
+ 	attributive = models.CharField(max_length=5)
     #Px12Pl, Px1Pl, Px2Pl.. etc
  	possessive = models.CharField(max_length=10)
     #Prox/Med/Dist
@@ -99,3 +105,12 @@ class Lemma(models.Model):
 
     #This model is from oahpa, these are forms that are not valid for crk
  	gender = models.CharField(max_length=5)
+
+    def __str__(self):
+        return self.string
+
+class Course(models.Model):
+
+    teacher = models.CharField(max_length=50)
+    #also courses should have a list of words.
+    lemmas = models.ManyToManyField(Lemma)
