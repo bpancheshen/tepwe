@@ -16,7 +16,7 @@ class Word(models.Model):
     wordform = models.CharField(max_length=200, db_index=True)
     lemma = models.ForeignKey('Lemma', on_delete=models.CASCADE)
     gram_code = models.ForeignKey('Tag', on_delete=models.CASCADE)
-    translation = models.CharField(max_length=40)
+    translation = models.CharField(max_length=40, default="namôya nisitotin")
 
     def __str__(self):
         return self.wordform
@@ -33,13 +33,15 @@ class Lemma(models.Model):
     lemma = models.CharField(max_length=20)
     language = models.CharField(max_length=5, default=LEARNING_LANG)
     pos = models.CharField(max_length=12) # Accomodate larger PoS
+    trans_anim = models.CharField(max_length=12)
 
-    course = models.ManyToManyField(Course)
+#This is unacceptable in this form. It's not needed yet, so I'm just commenting it out
+    # course = models.ManyToManyField('Course')
 
     def __str__(self):
         return self.lemma
 
- class Tag(models.Model):
+class Tag(models.Model):
     '''
     These tags are used by the fst to compute the forms.
     They will be different for every language and all must be included.
@@ -49,62 +51,75 @@ class Lemma(models.Model):
     '''
 
     #the full string of the tag. Should be valid to the fst.
-    string = models.CharField(max_length=40, unique=True)
- 	pos = models.CharField(max_length=12)
+    string = models.CharField(primary_key=True, max_length=40, unique=True)
+    pos = models.CharField(max_length=12)
 
     #only applies to nouns
 
     #AN or IN
- 	animacy = models.CharField(max_length=5)
+    animacy = models.CharField(max_length=5, blank=True)
     #Sg or Pl
- 	number = models.CharField(max_length=5)
+    number = models.CharField(max_length=5, blank=True)
     #Der/Dim or whether it's a diminutive or not
- 	derivation = models.CharField(max_length=7)
+    derivation = models.CharField(max_length=7, blank=True)
     #Comp, Superl
- 	grade = models.CharField(max_length=10)
+    grade = models.CharField(max_length=10, blank=True)
     #Obv, Loc
-    case = models.CharField(max_length=5)
+    case = models.CharField(max_length=5, blank=True)
 
     #only applies to verbs
 
     #AI, II, TA, TI
- 	trans_anim = models.CharField(max_length=5)
+    transitivity_animacy = models.CharField(max_length=5, blank=True)
     #Imp, Cnj, Ind, Cond
- 	mood = models.CharField(max_length=5)
+    mood = models.CharField(max_length=5, blank=True)
     #12Pl, 1Pl, 1Sg, etc
-    personnumber = models.CharField(max_length=8)
+    personnumber = models.CharField(max_length=8, blank=True)
     #PV/e
- 	preverb = models.CharField(max_length=8)
+    preverb = models.CharField(max_length=8, blank=True)
     #3SgO, 4SgO, 3PlO, etc, the personnumber of the object for TA verbs
- 	object = models.CharField(max_length=12)
+    object = models.CharField(max_length=12, blank=True)
     #Neg
- 	polarity = models.CharField(max_length=5)
+    polarity = models.CharField(max_length=5, blank=True)
     #Ind, Cnj
- 	mode = models.CharField(max_length=7)
+    mode = models.CharField(max_length=7, blank=True)
     #Prs, Prt, Fut
- 	tense = models.CharField(max_length=5)
+    tense = models.CharField(max_length=5, blank=True)
     #Def, Int
-    intentional_definite = models.CharField(max_length=5)
+    intentional_definite = models.CharField(max_length=5, blank=True)
 
 
- 	# conneg = models.CharField(max_length=5)
- 	infinite = models.CharField(max_length=10)
+    connegative = models.CharField(max_length=5, blank=True)
+    infinite = models.CharField(max_length=10, blank=True)
 
- 	# language = models.CharField(max_length=8)
+    # language = models.CharField(max_length=8)
 
     #applies to other parts of speech
 
     #Pos, I assume is possessive and not part of speech.
- 	attributive = models.CharField(max_length=5)
+    attributive = models.CharField(max_length=5, blank=True)
     #Px12Pl, Px1Pl, Px2Pl.. etc
- 	possessive = models.CharField(max_length=10)
+    possessive = models.CharField(max_length=10, blank=True)
     #Prox/Med/Dist
- 	distance = models.CharField(max_length=7)
+    distance = models.CharField(max_length=7, blank=True)
     #Prop, Pers, Dem, Interr, Refl, Card
- 	subclass = models.CharField(max_length=10)
+    subclass = models.CharField(max_length=10, blank=True)
 
     #This model is from oahpa, these are forms that are not valid for crk
- 	gender = models.CharField(max_length=5)
+    gender = models.CharField(max_length=5, blank=True)
+    language = models.CharField(max_length=5, blank=True)
+    passive = models.CharField(max_length=5, blank=True)
+    demtype = models.CharField(max_length=5, blank=True)
+    reflexivepossessive = models.CharField(max_length=5, blank=True)
+    punctuation = models.CharField(max_length=5, blank=True)
+    #numbern and npxnumber are not in the db. go eat your hat.
+    #pxcase1 through 3 are also not here. eat your socks too.
+    numeraltype = models.CharField(max_length=5, blank=True)
+    compound = models.CharField(max_length=5, blank=True)
+    imptype = models.CharField(max_length=5, blank=True)
+    syntax = models.CharField(max_length=5, blank=True)
+    clitic = models.CharField(max_length=5, blank=True)
+    nametype = models.CharField(max_length=5, blank=True)
 
     def __str__(self):
         return self.string
