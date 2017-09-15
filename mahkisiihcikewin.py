@@ -94,11 +94,15 @@ def main(USE_GT):
         # TODO check to see if all the lemmas are already in the database,
             #if they aren't in the database, add the lemmas
 
-        for l in lemmas[4:]:
+        for l in lemmas:
+            #make sure that at least one wordform is created for the lemma
+            found_one = False
+
             #get the string of the lemma i.e. 'atim'
             lemmaForm = l[0]
             #get the type of word. i.e. "N+AN", or "V+TI"
             lemmaType = l[1]
+            translation = l[2]
             lemma_object, lemma_created = Lemma.objects.get_or_create(
                                             lemma = lemmaForm,
                                             pos = lemmaType.split('+')[0],
@@ -106,35 +110,63 @@ def main(USE_GT):
 
             #run the generator for each tag appropriate for this lemmaType
             for tag in allTags.paradigmDict[lemmaType]:
-                output, err = queryGenerator(lemmaForm, tag)
-                if err:
-                    print("WARNING: ERROR on" + lemmaForm, tag)
 
-                #this option means the fst didn't generate a form
-                elif output.strip().endswith('+?'):
-                    print(tag, "not found for", lemmaForm)
+                #query the fst only if the wordform is new.
+                #TODO find a way to look for an object without throwing an error upon failure.
+                try:
+                    already_a_word = Word.objects.get(lemma=lemma_object, gram_code=tag)
+                except:
+                    already_a_word = False
+                #if already_a_word is an object or if it's true, flip the variable
+                #so an error message is not sent.
+                if already_a_word != False:
+                    # print('no query for ' + lemmaForm, tag)
+                    found_one = True
 
-                #everything is good, lets continue.
                 else:
-                    #a little formatting.
-                    #   sometimes there is more than one form. Output looks like this
-                    #   '\tkititwânânaw\n\tkititwânaw\n\n'
-                    output = output.split()
+                    output, err = queryGenerator(lemmaForm, tag)
 
-                    #parse tags to add it to the database
-                    tag_object, tag_created = add_tags_to_db(
-                                                            lemmaForm,
-                                                            tag,
-                                                            tag_dictionary)
+                    if err:
+                        print("WARNING: ERROR on" + lemmaForm, tag)
+
+                    #this option means the fst didn't generate a form
+                    elif output.strip().endswith('+?'):
+                        # print(tag, "not found for", lemmaForm)
+                        pass
+
+                    #everything is good, lets continue.
+                    else:
+                        found_one = True
+
+                        #a little formatting.
+                        #   sometimes there is more than one form. Output looks like this
+                        #   '\tkititwânânaw\n\tkititwânaw\n\n'
+                        output = output.split()
+
+                        #parse tags to add it to the database
+                        #The tag are set up down here instead of in their own method
+                        #because I only want tags that are useful in the database.
+                        # print('attempting to add ' + tag + ' for ' + lemmaForm)
+                        tag_object, tag_created = add_tags_to_db(
+                                                                tag,
+                                                                tag_dictionary)
 
 
 
-                    word_object, word_created = Word.objects.get_or_create(
-                                                wordform=output[0], #TODO add all the wordforms
-                                                lemma=lemma_object,
-                                                gram_code=tag_object,)
+                        word_object, word_created = Word.objects.get_or_create(
+                                                    wordform=output[0], #TODO add all the wordforms
+                                                    lemma=lemma_object,
+                                                    gram_code=tag_object,)
+                        if word_created:
+                            # print('wordform was created for: ', lemmaForm, tag)
+                            pass
+                        else:
+                            print('word object already exists for :', lemmaForm, tag)
 
-                    print('wordform was created for: ', lemmaForm, tag) if word_created
+            if not found_one:
+                print(lemmaForm + " produced not even a single lem. !!ALERT!!")
+                the_pause = input("hit enter to acknowledge")
+
 def loadFile():
     """
     opens the exported db file described as CSV_LEMMA,
@@ -149,7 +181,7 @@ def loadFile():
      ex.
 
      lemmas, fields, dict = loadFile()
-     lemma[0] = ('atim', 'N+AN')
+     lemmas[0] = ('atim', 'N+AN', 'dog')
      fields[0] = lemma_id
      dictionary[atim] = 1
 
@@ -187,8 +219,10 @@ def loadFile():
         #get the lemma type
         lemma_type = line[3] + "+" + line[4]
 
+        translation = line[5]
+
         #append the list to be returned with a tuple of the lemma and it's type.
-        lemmas.append((entry, lemma_type))
+        lemmas.append((entry, lemma_type, translation))
 
         #add an entry into the dictionary, this will link the lemma id with the word id
         lemma_dictionary[entry] = line[0]
@@ -215,13 +249,13 @@ def load_tagfile():
         #there are some duplicate tags. I don't want them. Only add to fieldmap
         #if the tag is unique
         elif line not in fieldmap:
-            print('adding to fieldmap: ',line, heading.lower() )
+            # print('adding to fieldmap: ',line, heading.lower() )
             fieldmap[line] = heading.lower()
-            print (fieldmap[line])
+            # print (fieldmap[line])
 
     return fieldmap
 
-def add_tags_to_db(lemma, tag, fieldmap):
+def add_tags_to_db(tag, fieldmap):
     """
     This accepts the argument, tag, which is just a grammar tag loaded from paradigms.txt.
     It splits the tag into it's component parts and lines them up so we can create
