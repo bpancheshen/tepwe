@@ -129,3 +129,13 @@ class Course(models.Model):
     teacher = models.CharField(max_length=50)
     #also courses should have a list of words.
     lemmas = models.ManyToManyField(Lemma)
+
+class LemmaQuestion(models.Model):
+    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
+
+
+class TagQuestion(models.Model):
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+
+class LemmaQuestionForm():
+    pass
