@@ -34,6 +34,7 @@ class Lemma(models.Model):
     language = models.CharField(max_length=5, default=LEARNING_LANG)
     pos = models.CharField(max_length=12) # Accomodate larger PoS
     trans_anim = models.CharField(max_length=12)
+    translation = models.CharField(max_length=40)
 
 #This is unacceptable in this form. It's not needed yet, so I'm just commenting it out
     # course = models.ManyToManyField('Course')
