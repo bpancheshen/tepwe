@@ -1,0 +1,2 @@
+#Things git should ignore
+*.sqlite3

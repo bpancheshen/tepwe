@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib import auth
 from django.conf import settings
+from django.forms import ModelForm
 # Create your models here.
 
 LEARNING_LANG = settings.LEARNING_LANG
@@ -131,12 +132,13 @@ class Course(models.Model):
     #also courses should have a list of words.
     lemmas = models.ManyToManyField(Lemma)
 
-class LemmaQuestion(models.Model):
-    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
 
+class Question(models.Model):
+    wordform = models.ForeignKey(Word)
+    tag = models.ForeignKey(Tag)
+    lemma = models.ForeignKey(Lemma)
 
-class TagQuestion(models.Model):
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-
-class LemmaQuestionForm():
-    pass
+class QuestionForm(ModelForm):
+    class Meta:
+        model = Question
+        fields = ['wordform']
