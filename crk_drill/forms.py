@@ -4,7 +4,6 @@ from django.contrib.auth.forms import UserCreationForm
 from django import forms
 
 from crk_drill.models import Lemma, Tag, Word
-from crk_drill.models import QuestionForm
 import random
 
 class CreateUser(UserCreationForm):
@@ -18,12 +17,29 @@ class CreateUser(UserCreationForm):
         self.fields['username'].label = 'Username'
         self.fields['email'].label = "Email Address"
 
-class QuestionForm(forms.Form):
-    
-    def __init__(self, data, wordform, *args, **kwargs):
-        self.wordform = wordform
-        self.field = forms.CharField(
-                label = wordform.wordform + " " + wordform.gram_code.string,
-                max_length=50)
+class BasicLeksaForm(forms.Form):
+    answer = forms.CharField(max_length=40, label="Translation")
 
-        return super(QuestionForm, self).__init__(data, *args, **kwargs)
+
+
+
+    # def clean_answer(self):
+    #     # print("cleaning answer")
+    #     #oh, you're ready to check the answer,
+    #     #well,
+    #     #you're going to need the answer from request.POST
+    #     answer = self.cleaned_data.get('answer')
+    #
+    #     lemma = self.cleaned_data.get('lemma')
+    #
+    #     print(lemma, tag)
+    #
+    #     #check it against the form
+    #     correct_answer = Lemma.objects.get(lemma='lemma')
+    #     print(answer)
+    #     print(correct_answer)
+    #
+    #     if answer != correct_answer:
+    #         raise forms.ValidationError(self.error_messages['incorrect_answer'],
+    #             code='incorrect_answer')
+    #     return answer

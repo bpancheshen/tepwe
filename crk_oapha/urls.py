@@ -25,5 +25,5 @@ urlpatterns = [
     url(r'login/', auth_views.LoginView.as_view(template_name = 'login.html'), name='login'),
     url(r'logout/', auth_views.LogoutView.as_view(), name='logout'),
     url(r'^wordlist/$', views.WordListView.as_view(), name='wordlist'),
-    url(r'^question/$', views.QuestionView, name='questionview'),
+    url(r'^question/$', views.QuestionView.as_view(), name='questionview'),
 ]

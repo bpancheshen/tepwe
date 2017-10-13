@@ -16,6 +16,7 @@ class Word(models.Model):
     language = models.CharField(max_length=5, default=LEARNING_LANG, db_index=True)
     wordform = models.CharField(max_length=200, db_index=True)
     lemma = models.ForeignKey('Lemma', on_delete=models.CASCADE)
+    #TODO change this to tag, you mess it up everytime.
     gram_code = models.ForeignKey('Tag', on_delete=models.CASCADE)
     translation = models.CharField(max_length=40, default="namôya nisitotin")
 
@@ -30,6 +31,7 @@ class Word(models.Model):
         return self.lemma.pos=='V'
 
 class Lemma(models.Model):
+#TODO: Make lemma a primary_key
 
     lemma = models.CharField(max_length=20)
     language = models.CharField(max_length=5, default=LEARNING_LANG)
@@ -126,19 +128,35 @@ class Tag(models.Model):
     def __str__(self):
         return self.string
 
-class Course(models.Model):
+"""
+class Session(models.Model):
 
-    teacher = models.CharField(max_length=50)
-    #also courses should have a list of words.
-    lemmas = models.ManyToManyField(Lemma)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("User"))
+    question_list = models.CommaSeparatedIntegerField(
+        max_length=1024, verbose_name=_("Question List"))
 
 
 class Question(models.Model):
-    wordform = models.ForeignKey(Word)
-    tag = models.ForeignKey(Tag)
-    lemma = models.ForeignKey(Lemma)
+    wordform = models.ForeignKey(Word,
+                                verbose_name=_("Wordform"),
+                                blank=True,
+                                null=True)
+    tag = models.ForeignKey(Tag,
+                                verbose_name=_("Tag"),
+                                blank=True,
+                                null=True)
+    lemma = models.ForeignKey(Lemma,
+                                verbose_name=_("Lemma"),
+                                blank=True,
+                                null=True)
 
-class QuestionForm(ModelForm):
+    quiz = models.ManyToManyField(Quiz,
+                                verbose_name=_("Quiz"),
+                                blank=True)
     class Meta:
-        model = Question
-        fields = ['wordform']
+        verbose_name = _("Question")
+        verbose_name_plural = _("Questions")
+
+    def __str__(self):
+        return str(self.wordform.wordform, self.tag.string)
+"""

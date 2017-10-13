@@ -106,7 +106,8 @@ def main(USE_GT):
             lemma_object, lemma_created = Lemma.objects.get_or_create(
                                             lemma = lemmaForm,
                                             pos = lemmaType.split('+')[0],
-                                            trans_anim = lemmaType.split('+')[1])
+                                            trans_anim = lemmaType.split('+')[1],
+                                            translation=translation)
 
             #run the generator for each tag appropriate for this lemmaType
             for tag in allTags.paradigmDict[lemmaType]:
@@ -114,7 +115,7 @@ def main(USE_GT):
                 #query the fst only if the wordform is new.
                 #TODO find a way to look for an object without throwing an error upon failure.
                 try:
-                    already_a_word = Word.objects.get(lemma=lemma_object, gram_code=tag)
+                    already_a_word = Word.objects.get(lemma=lemma_object, gram_code=tag, translation=translation)
                 except:
                     already_a_word = False
                 #if already_a_word is an object or if it's true, flip the variable
@@ -156,7 +157,8 @@ def main(USE_GT):
                         word_object, word_created = Word.objects.get_or_create(
                                                     wordform=output[0], #TODO add all the wordforms
                                                     lemma=lemma_object,
-                                                    gram_code=tag_object,)
+                                                    gram_code=tag_object,
+                                                    translation=translation)
                         if word_created:
                             # print('wordform was created for: ', lemmaForm, tag)
                             pass
